@@ -7,16 +7,16 @@
 
 With devtools:
 
-```{r}
+``` r
 devtools::install_github("hkauhanen/cre")
 ```
 
 
 ## Basic usage
 
-A package vignette is in preparation. In the meantime, the fitting routine based on nonlinear least squares (Kauhanen & Walkden 2018) can be operated as follows (see the folder `inst/extdata` for a mock random data set in various formats):
+A package vignette is in preparation. In the meantime, the fitting routine based on nonlinear least squares (Kauhanen & Walkden 2018) can be operated as follows (see the folder [`inst/extdata`](inst/extdata) for a mock random data set in various formats):
 
-```{r}
+``` r
 df <- read.csv("inst/extdata/mockdata_long.csv")
 fit <- fit.cre.nls(df, format="long", model="logistic", budget=100)
 ```
@@ -26,7 +26,7 @@ The result, `fit`, is a list of five elements: the data set used, the best-fitti
 
 ## Issues?
 
-If you find a bug, please file an [issue](issues). If you have a feature request, please consider emailing Henri: [henri@henr.in](mailto:henri@henr.in).
+If you find a bug, please file an [issue](https://github.com/hkauhanen/cre/issues). If you have a feature request, please consider emailing Henri: [henri@henr.in](mailto:henri@henr.in).
 
 
 ## References
