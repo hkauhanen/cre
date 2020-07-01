@@ -42,7 +42,7 @@ fit <- fit.cre.nls(df, format="wide", model="logistic", budget=100)
 # response-level data
 df <- read.csv("inst/extdata/mockdata_responses.csv")
 df <- frequentize(df)
-fit <- fit.cre.nls(df, format="wide", model="logistic", budget=100)
+fit <- fit.cre.nls(df, format="long", model="logistic", budget=100)
 ```
 
 
