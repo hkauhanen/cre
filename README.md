@@ -9,6 +9,7 @@ With devtools:
 
 ``` r
 devtools::install_github("hkauhanen/cre")
+library(cre)
 ```
 
 
