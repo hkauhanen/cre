@@ -26,6 +26,26 @@ Setting `model="logistic"` fits the classical model of logistics agreeing in the
 The result, `fit`, is a list of five elements: the data set used, the best-fitting parameters found, the residual sum of squares, the residual sum of squares normalized by number of data points, and the number of data points.
 
 
+## Alternative input formats
+
+In addition to long format, the data can be a wide-format table of frequencies or a data frame of (binary) response-level data. See again [`inst/extdata`](inst/extdata) for examples. The following all lead to the same outcome:
+
+``` r
+# long-format frequency data
+df <- read.csv("inst/extdata/mockdata_long.csv")
+fit <- fit.cre.nls(df, format="long", model="logistic", budget=100)
+
+# wide-format frequency data
+df <- read.csv("inst/extdata/mockdata_wide.csv")
+fit <- fit.cre.nls(df, format="wide", model="logistic", budget=100)
+
+# response-level data
+df <- read.csv("inst/extdata/mockdata_responses.csv")
+df <- frequentize(df)
+fit <- fit.cre.nls(df, format="wide", model="logistic", budget=100)
+```
+
+
 ## Issues?
 
 If you find a bug, please file an [issue](https://github.com/hkauhanen/cre/issues). If you have a feature request, please consider emailing Henri: [henri@henr.in](mailto:henri@henr.in).
