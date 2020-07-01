@@ -32,5 +32,6 @@ write.csv(df, file="inst/extdata/mockdata_responses.csv", row.names=FALSE)
 # Write frequentized versions in both long and wide format
 write.csv(frequentize(df), file="inst/extdata/mockdata_long.csv", row.names=FALSE)
 wide_df <- reshape(frequentize(df), idvar="date", timevar="context", direction="wide")
+names(wide_df) <- c("date", "con1", "con2", "con3")
 write.csv(wide_df, file="inst/extdata/mockdata_wide.csv", row.names=FALSE)
 
