@@ -1,0 +1,166 @@
+#' Fit Constant Rate Effect Models (Classical Methods)
+#'
+#' Decides between CRE and VRE on a given dataset using one of the classical methods based on logistic regression.
+#'
+#' FIXME details, including very short descrition of methods and a reference to our paper
+#'
+#' @param data Data frame containing response (not frequency) data
+#' @param method Method to use; see Details
+#' @param alpha Desired type I error level at which the hypothesis of a CRE is rejected
+#' @return FIXME
+#' 
+#' @importFrom stats anova glm lm pchisq
+#' @export
+fit.cre.classical <- function(data,
+                              method,
+                              alpha = 0.05) {
+  outmethod <- method
+  chilim <- 1
+  if (method == "M4b") {
+    method <- "M4"
+    chilim <- 5
+  } else if (method == "M7b") {
+    method <- "M7"
+    chilim <- 5
+  }
+
+  if (method == "M4") {
+    p <- tryCatch({
+    # glm fit
+    fit <- glm(response~date+context, data, family="binomial")
+
+    # get factor weights
+    coeff <- as.list(fit$coefficients)
+    coeff <- c(coeff, context1=0)
+    names(coeff)[1] <- "intercept"
+
+    # frequentize data
+    fdata <- frequentize(data)
+
+    # generate data based on CRE model
+    tdata <- fdata
+    meandate <- mean(data$date)
+    for (i in 1:nrow(tdata)) {
+      X <- coeff$date*tdata[i,]$date + coeff$intercept + coeff[[paste0("context", tdata[i,]$context)]]
+      tdata[i,]$frequency <- 1/(1 + exp(-X))
+      tdata[i,]$applications <- round(tdata[i,]$frequency*tdata[i,]$N)
+      tdata[i,]$nonapplications <- tdata[i,]$N - tdata[i,]$applications
+    }
+
+    for (i in 1:nrow(fdata)) {
+      if (fdata[i,]$applications < chilim | fdata[i,]$nonapplications < chilim | tdata[i,]$applications < chilim | tdata[i,]$nonapplications < chilim) {
+        fdata[i,]$applications <- NA
+        tdata[i,]$applications <- NA
+      }
+    }
+    fdata <- fdata[!is.na(fdata$applications), ]
+    tdata <- tdata[!is.na(tdata$applications), ]
+
+    # Rousseau and Sankoff's chi^2 test
+    RS.chisq(observed=fdata, expected=tdata)
+    }, error = function(cond) {
+      NA
+    })
+  } else if (method == "M5") {
+    p <- tryCatch({
+    # glm fit
+    fit <- glm(response~date*context, data, family="binomial")
+
+    # test
+    test <- summary(fit)$coefficients
+    test <- test[grepl(row.names(test), pattern="date:context"), "Pr(>|z|)"]
+    min(test)
+    }, error = function(cond) {
+      NA
+    })
+  } else if (method == "M6") {
+    p <- tryCatch({
+    # glm fit
+    fit <- glm(response~date*context, data, family="binomial")
+
+    # test
+    test <- anova(fit, test="LRT")
+    test["date:context", "Pr(>Chi)"]
+    }, error = function(cond) {
+      NA
+    })
+  } else if (method == "M7") {
+    p <- NA
+    p <- tryCatch({
+    # frequentize data
+    fdata <- frequentize(data)
+
+    # remove pathological cases where frequency is 1 or 0
+    fdata <- fdata[fdata$frequency < 1 & fdata$frequency > 0, ]
+
+    # logit transform
+    fdata$logit <- log(fdata$frequency/(1 - fdata$frequency))
+
+    # lm fit for each context
+    slopes <- vector("list", length(unique(fdata$context)))
+    names(slopes) <- unique(fdata$context)
+    intercepts <- slopes
+    for (con in unique(fdata$context)) {
+      df <- fdata[fdata$context==con, ]
+      fit <- lm(logit~date, df)
+      intercepts[[con]] <- coef(fit)[1]
+      slopes[[con]] <- coef(fit)[2]
+    }
+    meanslope <- mean(unlist(slopes))
+
+    # generate data based on CRE model
+    tdata <- fdata
+    for (i in 1:nrow(tdata)) {
+      k <- intercepts[[tdata[i,]$context]]
+      tdata[i,]$logit <- meanslope*tdata[i,]$date + k
+      tdata[i,]$frequency <- 1/(1 + exp(-tdata[i,]$logit))
+      tdata[i,]$applications <- round(tdata[i,]$frequency*tdata[i,]$N)
+      tdata[i,]$nonapplications <- tdata[i,]$N - tdata[i,]$applications
+    }
+
+    for (i in 1:nrow(fdata)) {
+      if (fdata[i,]$applications < chilim | fdata[i,]$nonapplications < chilim | tdata[i,]$applications < chilim | tdata[i,]$nonapplications < chilim) {
+        fdata[i,]$applications <- NA
+        tdata[i,]$applications <- NA
+      }
+    }
+    fdata <- fdata[!is.na(fdata$applications), ]
+    tdata <- tdata[!is.na(tdata$applications), ]
+
+    # chi^2 test
+    RS.chisq(observed=fdata, expected=tdata)
+    }, error = function(cond) {
+      NA
+    })
+  }
+
+  # significant?
+  if (is.na(p)) {
+    sig <- NA
+    dec <- NA
+  } else if (p < alpha) {
+    sig <- TRUE
+    dec <- "VRE"
+  } else {
+    sig <- FALSE
+    dec <- "CRE"
+  }
+
+  # return
+  data.frame(method=outmethod, alpha=alpha, p=p, significant=sig, decision=dec)
+}
+
+
+RS.chisq <- function(observed,
+                     expected) {
+  # The test statistic is calculated as outlined in Rousseau & Sankoff 1978.
+  test_statistic <- sum((c(observed$applications, observed$nonapplications) - c(expected$applications, expected$nonapplications))^2/c(expected$applications, expected$nonapplications))
+
+  # Degrees of freedom is number of counts minus one (note that the
+  # nonapplication counts are determined as soon as application counts are
+  # known).
+  df <- length(observed$applications) - 1
+
+  pchisq(q=test_statistic, df=df, lower.tail=FALSE)
+}
+
