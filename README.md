@@ -22,7 +22,7 @@ df <- read.csv("inst/extdata/mockdata_long.csv")
 fit <- fit.cre.nls(df, format="long", model="logistic", budget=100)
 ```
 
-Setting `model="logistic"` fits the classical model of logistics agreeing in their slope (Kroch 1989); setting `model="bias"` fits the production bias model (Kauhanen & Walkden 2018); setting `model="VRE"` fits a family of logistics freely varying in slopes and intercepts. See the [manual](cre.pdf) for details.
+Setting `model="logistic"` fits the classical model of logistics agreeing in their slope (Kroch 1989); setting `model="bias"` fits the production bias model (Kauhanen & Walkden 2018); setting `model="VRE"` fits a family of logistics freely varying in slopes and intercepts. The `budget` argument specifies how much computational budget is devoted to the fitting; larger numbers explore a more finely resolved regime of parameter combinations and hence lead to better fits, but incur longer running times. See the [manual](cre.pdf) for details.
 
 The result, `fit`, is a list of five elements: the data set used, the best-fitting parameters found, the residual sum of squares, the residual sum of squares normalized by number of data points, and the number of data points.
 
