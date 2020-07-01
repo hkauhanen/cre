@@ -51,6 +51,17 @@ fit <- fit.cre.nls(df, format="wide", model="logistic", budget=100)
 If you find a bug, please file an [issue](https://github.com/hkauhanen/cre/issues). If you have a feature request, please consider emailing Henri: [henri@henr.in](mailto:henri@henr.in).
 
 
+## In the pipeline
+
+The following features are in active development, more or less in the following order of urgency:
+
+1. Implement routines for fitting traditional VARBRUL-style logistic regressions
+2. Enrich documentation with examples
+3. Document the more mysterious operations of the fitting routines (such as auto-guessing of parameter ranges)
+4. Write vignettes
+5. Statistical tests for rigorous selection between competing models
+
+
 ## References
 
 Kauhanen, H. & Walkden, G. (2018) Deriving the Constant Rate Effect. *Natural Language & Linguistic Theory*, 36(2), 483–521. <https://doi.org/10.1007/s11049-017-9380-1>
