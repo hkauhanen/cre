@@ -60,6 +60,7 @@ The following features are in active development, more or less in the following 
 3. Document the more mysterious operations of the fitting routines (such as auto-guessing of parameter ranges)
 4. Write vignettes
 5. Statistical tests for rigorous selection between competing models
+6. Tidy up code
 
 
 ## References
